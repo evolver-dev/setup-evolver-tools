@@ -1,0 +1,34 @@
+name: 'Setup evolver-tools'
+description: 'Install evolver-tools (254+ zero-dependency CLI tools) in your GitHub Actions CI pipeline'
+author: 'EVOLVER'
+branding:
+  icon: 'terminal'
+  color: 'green'
+
+inputs:
+  version:
+    description: 'Version of evolver-tools to install (e.g., "38.0.2"). Defaults to latest.'
+    required: false
+    default: 'latest'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install evolver-tools
+      shell: bash
+      run: |
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          pip install evolver-tools
+        else
+          pip install evolver-tools==${{ inputs.version }}
+        fi
+        echo "✅ evolver-tools installed"
+        evtool --help 2>/dev/null || true
+
+    - name: Verify installation
+      shell: bash
+      run: |
+        echo "## evolver-tools installed" >> $GITHUB_STEP_SUMMARY
+        pip show evolver-tools >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Available tools: $(ls -d $(python3 -c 'import os, site; print(site.getsitepackages()[0])')/evolver_tools/tools/*/ 2>/dev/null | wc -l)" >> $GITHUB_STEP_SUMMARY
